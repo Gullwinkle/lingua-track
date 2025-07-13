@@ -1,0 +1,13 @@
+{% extends "core/base.html" %}
+{% block title %}Удалить карточку{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Удалить карточку</h1>
+    <p>Вы уверены, что хотите удалить карточку "<strong>{{ card.word }}</strong>"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить</button>
+        <a href="{% url 'core:card_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

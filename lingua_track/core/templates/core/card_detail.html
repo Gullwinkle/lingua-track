@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Карточка: {{ card.word }}{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>Карточка: {{ card.word }}</h1>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ card.word }}</h5>
+            <p class="card-text"><strong>Перевод:</strong> {{ card.translation }}</p>
+            <p class="card-text"><strong>Пример:</strong> {{ card.example|default:"—" }}</p>
+            <p class="card-text"><strong>Заметки:</strong> {{ card.notes|default:"—" }}</p>
+            <p class="card-text"><strong>Сложность:</strong> {{ card.get_difficulty_display }}</p>
+            <audio controls>
+                <source src="{% url 'tts:say_word_file' card.word %}" type="audio/mpeg">
+                Ваш браузер не поддерживает воспроизведение аудио.
+            </audio>
+            <div class="mt-3">
+                <a href="{% url 'core:card_edit' card.id %}" class="btn btn-warning btn-sm">Редактировать</a>
+                <a href="{% url 'core:card_delete' card.id %}" class="btn btn-danger btn-sm">Удалить</a>
+                <a href="{% url 'core:card_list' %}" class="btn btn-secondary btn-sm">Вернуться к карточкам</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

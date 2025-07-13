@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+{% block title %}Прогресс{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Ваш прогресс</h1>
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Общая статистика</h5>
+            <p><strong>Всего карточек:</strong> {{ context.total_cards }}</p>
+            <p><strong>Выучено карточек:</strong> {{ context.learned_cards }}</p>
+            <p><strong>Всего повторений:</strong> {{ context.total_reviews }}</p>
+        </div>
+    </div>
+    {% if context.stats %}
+        <h5>Статистика по карточкам</h5>
+        <div class="list-group">
+            {% for stat in context.stats %}
+                <div class="list-group-item">
+                    <h6>{{ stat.card.word }} - {{ stat.card.translation }}</h6>
+                    <p>Правильных ответов: {{ stat.correct_answers }}</p>
+                    <p>Неправильных ответов: {{ stat.incorrect_answers }}</p>
+                    <p>Всего повторений: {{ stat.total_reviews }}</p>
+                    <p>Последнее повторение: {{ stat.last_reviewed|date:"d.m.Y H:i" }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">Статистика пока отсутствует. Начните повторять карточки!</p>
+    {% endif %}
+    <a href="{% url 'core:card_list' %}" class="btn btn-secondary mt-3">Вернуться к карточкам</a>
+</div>
+{% endblock %}

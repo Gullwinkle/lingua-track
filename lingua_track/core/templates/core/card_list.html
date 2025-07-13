@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+{% block title %}Мои карточки{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Мои карточки</h1>
+    <a href="{% url 'core:card_create' %}" class="btn btn-primary mb-3">Добавить карточку</a>
+    {% if cards %}
+        <div class="list-group">
+            {% for card in cards %}
+                <div class="list-group-item">
+                    <h5>{{ card.word }} - {{ card.translation }}</h5>
+                    <p>Уровень: {{ card.get_difficulty_display }}</p>
+                    <p>Следующее повторение: {{ card.next_review|date:"d.m.Y H:i" }}</p>
+                    <a href="{% url 'core:card_detail' card.id %}" class="btn btn-info btn-sm">Подробно</a>
+                    <a href="{% url 'core:card_edit' card.id %}" class="btn btn-warning btn-sm">Редактировать</a>
+                    <a href="{% url 'core:card_delete' card.id %}" class="btn btn-danger btn-sm">Удалить</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">У вас пока нет карточек. Добавьте первую!</p>
+    {% endif %}
+</div>
+{% endblock %}
