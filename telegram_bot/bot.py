@@ -3,7 +3,7 @@ import logging
 import aiohttp
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart, Command
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, BufferedInputFile
 from config import BOT_TOKEN
 
 # Настройка логирования
@@ -19,65 +19,71 @@ dp = Dispatcher()
 
 @dp.message(CommandStart())
 async def start(message: types.Message):
-    await message.reply('Привет! Я бот LinguaTrack. Используй команды:\n/today - слова на сегодня\n/test - пройти тест\n/progress - твой прогресс\n/say <слово> - озвучить слово\n/cards - список карточек')
+   await message.reply('Привет! Я бот LinguaTrack. Используй команды:\n/today - слова на сегодня\n/test - пройти тест\n/progress - твой прогресс\n/say <слово> - озвучить слово\n/cards - список карточек')
 
 @dp.message(Command('today'))
 async def today(message: types.Message):
-    telegram_id = str(message.from_user.id)
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(f'{API_BASE_URL}/today/?telegram_id={telegram_id}') as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if data:
-                        response_text = '\n'.join([f"{card['word']}: {card['translation']}" for card in data])
-                        await message.reply(f'Карточки на сегодня:\n{response_text}')
-                    else:
-                        await message.reply('На сегодня нет карточек для повторения.')
-                else:
-                    await message.reply(f'Привяжите ваш Telegram ID на сайте. Код ошибки: {response.status}')
-        except Exception as e:
-            logging.error(f'Ошибка в /today: {str(e)}')
-            await message.reply('Ошибка при получении карточек.')
+   telegram_id = str(message.from_user.id)
+   async with aiohttp.ClientSession() as session:
+       try:
+           async with session.get(f'{API_BASE_URL}/today/?telegram_id={telegram_id}') as response:
+               if response.status == 200:
+                   data = await response.json()
+                   if data:
+                       response_text = '\n'.join([f"{card['word']}: {card['translation']}" for card in data])
+                       await message.reply(f'Карточки на сегодня:\n{response_text}')
+                   else:
+                       await message.reply('На сегодня нет карточек для повторения.')
+               else:
+                   error_text = await response.text()
+                   logging.error(f'Ошибка API /today: Код {response.status}, Ответ: {error_text}')
+                   await message.reply(f'Привяжите ваш Telegram ID на сайте. Код ошибки: {response.status}')
+       except Exception as e:
+           logging.error(f'Ошибка в /today: {str(e)}')
+           await message.reply('Ошибка при получении карточек.')
 
 @dp.message(Command('cards'))
 async def cards(message: types.Message):
-    telegram_id = str(message.from_user.id)
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(f'{API_BASE_URL}/cards/?telegram_id={telegram_id}') as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if data:
-                        response_text = '\n'.join([f"{card['word']}: {card['translation']}" for card in data])
-                        await message.reply(f'Ваши карточки:\n{response_text}')
-                    else:
-                        await message.reply('У вас пока нет карточек.')
-                else:
-                    await message.reply(f'Привяжите ваш Telegram ID на сайте. Код ошибки: {response.status}')
-        except Exception as e:
-            logging.error(f'Ошибка в /cards: {str(e)}')
-            await message.reply('Ошибка при получении карточек.')
+   telegram_id = str(message.from_user.id)
+   async with aiohttp.ClientSession() as session:
+       try:
+           async with session.get(f'{API_BASE_URL}/cards/?telegram_id={telegram_id}') as response:
+               if response.status == 200:
+                   data = await response.json()
+                   if data:
+                       response_text = '\n'.join([f"{card['word']}: {card['translation']}" for card in data])
+                       await message.reply(f'Ваши карточки:\n{response_text}')
+                   else:
+                       await message.reply('У вас пока нет карточек.')
+               else:
+                   error_text = await response.text()
+                   logging.error(f'Ошибка API /cards: Код {response.status}, Ответ: {error_text}')
+                   await message.reply(f'Привяжите ваш Telegram ID на сайте. Код ошибки: {response.status}')
+       except Exception as e:
+           logging.error(f'Ошибка в /cards: {str(e)}')
+           await message.reply('Ошибка при получении карточек.')
 
 @dp.message(Command('progress'))
 async def progress(message: types.Message):
-    telegram_id = str(message.from_user.id)
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(f'{API_BASE_URL}/progress/?telegram_id={telegram_id}') as response:
-                if response.status == 200:
-                    data = await response.json()
-                    await message.reply(
-                        f'Ваш прогресс:\n'
-                        f'Всего карточек: {data["total_cards"]}\n'
-                        f'Выучено: {data["learned_cards"]}\n'
-                        f'Повторений: {data["total_reviews"]}'
-                    )
-                else:
-                    await message.reply(f'Привяжите ваш Telegram ID на сайте. Код ошибки: {response.status}')
-        except Exception as e:
-            logging.error(f'Ошибка в /progress: {str(e)}')
-            await message.reply('Ошибка при получении прогресса.')
+   telegram_id = str(message.from_user.id)
+   async with aiohttp.ClientSession() as session:
+       try:
+           async with session.get(f'{API_BASE_URL}/progress/?telegram_id={telegram_id}') as response:
+               if response.status == 200:
+                   data = await response.json()
+                   await message.reply(
+                       f'Ваш прогресс:\n'
+                       f'Всего карточек: {data["total_cards"]}\n'
+                       f'Выучено: {data["learned_cards"]}\n'
+                       f'Повторений: {data["total_reviews"]}'
+                   )
+               else:
+                   error_text = await response.text()
+                   logging.error(f'Ошибка API /progress: Код {response.status}, Ответ: {error_text}')
+                   await message.reply(f'Привяжите ваш Telegram ID на сайте. Код ошибки: {response.status}')
+       except Exception as e:
+           logging.error(f'Ошибка в /progress: {str(e)}')
+           await message.reply('Ошибка при получении прогресса.')
 
 @dp.message(Command('say'))
 async def say(message: types.Message):
@@ -88,75 +94,84 @@ async def say(message: types.Message):
     telegram_id = str(message.from_user.id)
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.get(f'{API_BASE_URL}/say/{word}/?telegram_id={telegram_id}') as response:
+            async with session.get(f'{API_BASE_URL}/file/say/{word}/?telegram_id={telegram_id}') as response:
                 if response.status == 200:
-                    data = await response.json()
-                    audio_url = data.get('audio_url')
-                    await message.reply_audio(audio=audio_url, title=word)
+                    if response.content_type != 'audio/mpeg':
+                        error_text = await response.text()
+                        logging.error(f'Ошибка API /file/say: Неверный тип ответа: {response.content_type}, Ответ: {error_text}')
+                        await message.reply(f'Ошибка: Неверный формат ответа от сервера.')
+                        return
+                    audio_data = await response.read()
+                    audio_file = BufferedInputFile(audio_data, filename=f'{word}.mp3')
+                    await message.reply_audio(audio=audio_file, title=word)
                 else:
-                    await message.reply(f'Привяжите ваш Telegram ID на сайте. Код ошибки: {response.status}')
+                    error_text = await response.text()
+                    logging.error(f'Ошибка API /file/say: Код {response.status}, Ответ: {error_text}')
+                    await message.reply(f'Ошибка: Код {response.status}, {error_text}')
         except Exception as e:
             logging.error(f'Ошибка при озвучивании слова "{word}": {str(e)}')
-            await message.reply('Ошибка при озвучивании слова.')
+            await message.reply(f'Ошибка при озвучивании слова: {str(e)}')
 
 @dp.message(Command('test'))
 async def test(message: types.Message):
-    telegram_id = str(message.from_user.id)
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(f'{API_BASE_URL}/test/?telegram_id={telegram_id}') as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if 'error' in data:
-                        await message.reply(data['error'])
-                        return
-                    card = data['card']
-                    choices = data['choices']
-                    keyboard = ReplyKeyboardMarkup(
-                        keyboard=[[KeyboardButton(text=choice['translation'])] for choice in choices],
-                        resize_keyboard=True,
-                        one_time_keyboard=True
-                    )
-                    await message.reply(
-                        f'Слово: {card["word"]}\nВыберите правильный перевод:',
-                        reply_markup=keyboard
-                    )
-                else:
-                    await message.reply(f'Привяжите ваш Telegram ID на сайте. Код ошибки: {response.status}')
-        except Exception as e:
-            logging.error(f'Ошибка в /test: {str(e)}')
-            await message.reply('Ошибка при запуске теста.')
+   telegram_id = str(message.from_user.id)
+   async with aiohttp.ClientSession() as session:
+       try:
+           async with session.get(f'{API_BASE_URL}/test/?telegram_id={telegram_id}') as response:
+               if response.status == 200:
+                   data = await response.json()
+                   if 'error' in data:
+                       await message.reply(data['error'])
+                       return
+                   card = data['card']
+                   choices = data['choices']
+                   keyboard = ReplyKeyboardMarkup(
+                       keyboard=[[KeyboardButton(text=choice['translation'])] for choice in choices],
+                       resize_keyboard=True,
+                       one_time_keyboard=True
+                   )
+                   await message.reply(
+                       f'Слово: {card["word"]}\nВыберите правильный перевод:',
+                       reply_markup=keyboard
+                   )
+               else:
+                   error_text = await response.text()
+                   logging.error(f'Ошибка API /test: Код {response.status}, Ответ: {error_text}')
+                   await message.reply(f'Привяжите ваш Telegram ID на сайте. Код ошибки: {response.status}')
+       except Exception as e:
+           logging.error(f'Ошибка в /test: {str(e)}')
+           await message.reply('Ошибка при запуске теста.')
 
 @dp.message(F.text)
 async def handle_test_answer(message: types.Message):
-    telegram_id = str(message.from_user.id)
-    answer = message.text
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.post(
-                f'{API_BASE_URL}/test/submit/',
-                json={'telegram_id': telegram_id, 'answer': answer}
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if data['correct']:
-                        await message.reply('Правильно! 🎉', reply_markup=types.ReplyKeyboardRemove())
-                    else:
-                        await message.reply(
-                            f'Неправильно. Правильный перевод: {data["correct_translation"]}',
-                            reply_markup=types.ReplyKeyboardRemove()
-                        )
-                    await message.reply('Используйте /test для следующего вопроса.')
-                else:
-                    error_text = await response.text()
-                    logging.error(f'Ошибка API /test/submit/: Код {response.status}, Ответ: {error_text}')
-                    await message.reply(f'Ошибка при отправке ответа. Код: {response.status}')
-        except Exception as e:
-            logging.error(f'Ошибка при обработке ответа теста: {str(e)}')
-            await message.reply('Ошибка при обработке ответа.')
+   telegram_id = str(message.from_user.id)
+   answer = message.text
+   async with aiohttp.ClientSession() as session:
+       try:
+           async with session.post(
+               f'{API_BASE_URL}/test/submit/',
+               json={'telegram_id': telegram_id, 'answer': answer}
+           ) as response:
+               if response.status == 200:
+                   data = await response.json()
+                   if data['correct']:
+                       await message.reply('Правильно! 🎉', reply_markup=types.ReplyKeyboardRemove())
+                   else:
+                       await message.reply(
+                           f'Неправильно. Правильный перевод: {data["correct_translation"]}',
+                           reply_markup=types.ReplyKeyboardRemove()
+                       )
+                   await message.reply('Используйте /test для следующего вопроса.')
+               else:
+                   error_text = await response.text()
+                   logging.error(f'Ошибка API /test/submit/: Код {response.status}, Ответ: {error_text}')
+                   await message.reply(f'Ошибка при отправке ответа. Код: {response.status}, Ответ: {error_text}')
+       except Exception as e:
+           logging.error(f'Ошибка при обработке ответа теста: {str(e)}')
+           await message.reply('Ошибка при обработке ответа.')
 
 async def main():
-    await dp.start_polling(bot)
+   await dp.start_polling(bot)
 
 if __name__ == '__main__':
-    asyncio.run(main())
+   asyncio.run(main())

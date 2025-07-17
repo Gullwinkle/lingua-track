@@ -77,6 +77,13 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = 'core:card_list'
 LOGOUT_REDIRECT_URL = 'core:card_list'
 
+# Настройки сессий
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 1209600  # Время жизни сессии в секундах (2 недели по умолчанию)
+SESSION_COOKIE_SECURE = False  # Установите True в продакшене для HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Защита от JavaScript-доступа
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Сессия не истекает при закрытии браузера
+
 WSGI_APPLICATION = 'lingua_track.wsgi.application'
 
 
