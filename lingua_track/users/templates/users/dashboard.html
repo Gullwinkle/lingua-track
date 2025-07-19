@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Панель управления{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">Добро пожаловать, {{ user.username }}!</h2>
+
+{% if not user.userprofile.telegram_id %}
+    <p>Вы ещё не привязали Telegram.</p>
+    <a class="btn btn-outline-primary" href="https://t.me/YOUR_BOT_NAME?start={{ user.id }}">Привязать Telegram</a>
+{% else %}
+    <p><strong>Telegram ID:</strong> {{ user.userprofile.telegram_id }}</p>
+{% endif %}
+{% endblock %}

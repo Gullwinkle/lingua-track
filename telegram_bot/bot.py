@@ -9,9 +9,9 @@ from config import BOT_TOKEN
 # Настройка логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Токен бота и URL API
+# Токен бота и URL api
 TELEGRAM_BOT_TOKEN = BOT_TOKEN  # Замените на ваш токен
-API_BASE_URL = 'http://localhost:8000/api'  # URL вашего Django API
+API_BASE_URL = 'http://localhost:8000/api'  # URL вашего Django api
 
 # Инициализация бота и диспетчера
 bot = Bot(token=TELEGRAM_BOT_TOKEN)

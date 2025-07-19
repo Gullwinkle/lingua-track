@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Повторение карточек{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Карточки на сегодня</h2>
+
+{% if schedule %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h4 class="card-title">{{ schedule.card.word }}</h4>
+            <p class="card-text">Перевод: <strong>{{ schedule.card.translation }}</strong></p>
+        </div>
+    </div>
+
+    <p>Как хорошо ты это помнишь?</p>
+    <div class="d-flex gap-2">
+        <a href="{% url 'review_result' schedule.id 0 %}" class="btn btn-outline-danger">Совсем не помню</a>
+        <a href="{% url 'review_result' schedule.id 3 %}" class="btn btn-outline-warning">С трудом</a>
+        <a href="{% url 'review_result' schedule.id 5 %}" class="btn btn-outline-success">Отлично помню</a>
+    </div>
+{% else %}
+    <p>На сегодня карточек для повторения нет 🎉</p>
+{% endif %}
+{% endblock %}

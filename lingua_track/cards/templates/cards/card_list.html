@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Мои карточки</h2>
+        <a href="{% url 'card_add' %}" class="btn btn-primary">➕ Добавить</a>
+    </div>
+
+    {% if cards %}
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for card in cards %}
+            <div class="col">
+                <div class="card h-100 shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title mb-1">{{ card.word }}</h5>
+                            <p class="card-text">{{ card.translation }}</p>
+                        </div>
+                        <div class="ms-3 d-flex flex-column align-items-end">
+                            <a href="{% url 'card_detail' card.id %}" class="btn btn-outline-primary btn-sm mb-1">🔍</a>
+                            <a href="{% url 'card_edit' card.id %}" class="btn btn-outline-secondary btn-sm mb-1">✏️</a>
+                            <form action="{% url 'card_delete' card.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Удалить карточку?')">🗑️</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>У вас пока нет карточек.</p>
+    {% endif %}
+</div>
+{% endblock %}

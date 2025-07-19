@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Карточка</h2>
+    <div class="card shadow-sm p-3">
+        <h4>{{ card.word }}</h4>
+        <p><strong>Перевод:</strong> {{ card.translation }}</p>
+        <p><strong>Пример:</strong> {{ card.example|default:"–" }}</p>
+        <p><strong>Создана:</strong> {{ card.created_at|date:"d.m.Y H:i" }}</p>
+
+        <button class="btn btn-secondary mt-2" onclick="speak('{{ card.word }}')">🔊 Озвучить</button>
+        <a href="{% url 'card_list' %}" class="btn btn-outline-primary mt-2">← Назад</a>
+    </div>
+</div>
+
+<script>
+function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    speechSynthesis.speak(utterance);
+}
+</script>
+{% endblock %}
