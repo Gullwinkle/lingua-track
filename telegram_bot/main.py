@@ -45,7 +45,7 @@ async def start_with_token(message: Message, command: CommandObject):
             "token": token
         }) as resp:
             if resp.status == 200:
-                await message.answer("✅ Telegram успешно привязан!")
+                await message.answer("✅ Telegram успешно привязан! Начните с команды /start.")
             else:
                 await message.answer("❌ Не удалось привязать аккаунт. Возможно, неверная ссылка.")
 
