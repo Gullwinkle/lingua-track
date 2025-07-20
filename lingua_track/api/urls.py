@@ -6,4 +6,5 @@ urlpatterns = [
     path('today/<int:telegram_id>/', views.get_today_cards),
     path('progress/<int:telegram_id>/', views.get_progress),
     path('say/<str:word>/', views.say_word, name='say_word'),
+    path('test-question/<int:telegram_id>/', views.test_question),
 ]

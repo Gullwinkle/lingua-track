@@ -1,11 +1,13 @@
 import asyncio
 import logging
 import aiohttp
-from aiogram import Bot, Dispatcher, types, F
+from aiogram import Bot, Dispatcher, types, F, Router
 from aiogram.enums import ParseMode
-from aiogram.types import Message
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.filters import CommandStart, Command
 from aiogram.filters.command import CommandObject
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from aiogram.client.default import DefaultBotProperties
 from config import BOT_TOKEN, API_URL
 from aiogram.types import FSInputFile
@@ -19,20 +21,18 @@ bot = Bot(
 dp = Dispatcher()
 
 @dp.message(F.text == "/start")
-async def cmd_start(message: Message):
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            f"{API_URL}/register/",
-            json={"telegram_id": message.from_user.id}
-        ) as resp:
-            if resp.status != 200:
-                text = await resp.text()
-                print("Ошибка при регистрации:", resp.status, text)
-                await message.answer("Ошибка при регистрации. Попробуйте позже.")
-                return
-            result = await resp.json()
-
-    await message.answer("Привет! Я помогу тебе учить слова 💬")
+async def start_command(message: Message):
+    text = (
+        "👋 *Добро пожаловать в LinguaTrack Bot!*\n\n"
+        "Вот список доступных команд:\n"
+        "📌 /start — показать это сообщение\n"
+        "📅 /today — слова для повторения на сегодня\n"
+        "📈 /progress — ваш прогресс в изучении\n"
+        "🧠 /test — тест с вариантами перевода\n"
+        "🔊 /say <слово> — озвучить слово\n\n"
+        "Успехов в обучении! 💪"
+    )
+    await message.answer(text, parse_mode="Markdown")
 
 # telegram_bot/main.py
 @dp.message(CommandStart(deep_link=True))
@@ -102,6 +102,50 @@ async def say_word(message: Message):
 
             else:
                 await message.answer("Не удалось озвучить слово 😕")
+
+
+class TestState(StatesGroup):
+    waiting_for_answer = State()
+
+
+
+@dp.message(F.text == "/test")
+async def start_test(message: Message):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"{API_URL}/test-question/{message.from_user.id}/") as resp:
+            if resp.status != 200:
+                await message.answer("Не удалось загрузить тест 😕")
+                return
+            data = await resp.json()
+
+    word = data["word"]
+    options = data["options"]
+    question_id = data["question_id"]
+
+    buttons = []
+    for option in options:
+        callback_data = f"answer:{question_id}:{option['id']}"
+        button = InlineKeyboardButton(text=option['translation'], callback_data=callback_data)
+        buttons.append([button])  # каждая кнопка — в отдельной строке
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    await message.answer(f"🔤 Как переводится слово: *{word}*?", parse_mode="Markdown", reply_markup=keyboard)
+
+@dp.callback_query(F.data.startswith("answer:"))
+async def handle_answer(callback: CallbackQuery):
+    _, correct_id, chosen_id = callback.data.split(":")
+    correct = correct_id == chosen_id
+
+    if correct:
+        text = "✅ Правильно!"
+    else:
+        text = "❌ Неправильно."
+
+    await callback.answer()
+    await callback.message.edit_reply_markup()
+    await callback.message.answer(text)
+
 
 async def main():
     logging.basicConfig(level=logging.INFO)

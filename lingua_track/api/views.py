@@ -1,7 +1,9 @@
 # api/views.py
 import io
+import random
 from django.http import HttpResponse
 from gtts import gTTS
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from cards.models import Card, Schedule
@@ -59,3 +61,32 @@ def say_word(request, word):
         return HttpResponse(mp3_fp.read(), content_type="audio/mpeg")
     except Exception:
         return HttpResponse("Ошибка при озвучке", status=500)
+
+@api_view(['GET'])
+def test_question(request, telegram_id):
+    try:
+        profile = UserProfile.objects.get(telegram_id=telegram_id)
+        user = profile.user
+    except UserProfile.DoesNotExist:
+        return Response({"detail": "Пользователь не найден"}, status=status.HTTP_404_NOT_FOUND)
+
+    cards = list(Card.objects.filter(user=user))
+    if len(cards) < 4:
+        return Response({"detail": "Недостаточно карточек для теста"}, status=status.HTTP_400_BAD_REQUEST)
+
+    correct = random.choice(cards)
+
+    # Получаем 3 случайных карточки, исключая правильную
+    distractors = random.sample([c for c in cards if c.id != correct.id], 3)
+
+    # Формируем список вариантов: правильный + 3 неправильных
+    options = [{"id": correct.id, "translation": correct.translation}]
+    options += [{"id": d.id, "translation": d.translation} for d in distractors]
+    random.shuffle(options)
+
+    data = {
+        "word": correct.word,
+        "question_id": correct.id,
+        "options": options
+    }
+    return Response(data)
