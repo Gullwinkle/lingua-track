@@ -8,6 +8,8 @@ from aiogram.filters import CommandStart, Command
 from aiogram.filters.command import CommandObject
 from aiogram.client.default import DefaultBotProperties
 from config import BOT_TOKEN, API_URL
+from aiogram.types import FSInputFile
+import tempfile
 
 
 bot = Bot(
@@ -74,6 +76,32 @@ async def cmd_progress(message: Message):
             stats = await resp.json()
 
     await message.answer(f"🧠 Всего слов: {stats['total']}\n🔁 К повторению: {stats['due']}")
+
+
+@dp.message(F.text.startswith("/say"))
+async def say_word(message: Message):
+    word = message.text[5:].strip()
+    if not word:
+        await message.answer("Пожалуйста, укажи слово: /say apple")
+        return
+
+    url = f"{API_URL}/say/{word}/"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                audio_bytes = await resp.read()
+
+                # Сохраняем временный файл
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_file:
+                    tmp_file.write(audio_bytes)
+                    tmp_path = tmp_file.name
+
+                voice = FSInputFile(tmp_path)
+                await message.answer_voice(voice=voice)
+
+            else:
+                await message.answer("Не удалось озвучить слово 😕")
 
 async def main():
     logging.basicConfig(level=logging.INFO)

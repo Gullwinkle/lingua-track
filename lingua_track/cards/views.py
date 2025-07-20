@@ -1,9 +1,13 @@
 # cards/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Card, ReviewSchedule
+from django.utils import timezone
+from .models import Card, Schedule
 from .forms import CardForm
+from .utils import update_schedule
 from datetime import date
+
+
 
 @login_required
 def card_list(request):
@@ -18,7 +22,7 @@ def card_add(request):
             card = form.save(commit=False)
             card.user = request.user
             card.save()
-            ReviewSchedule.objects.create(card=card)  # Создаем расписание для новой карточки
+            Schedule.objects.create(card=card, user=request.user)  # Создаем расписание для новой карточки
             return redirect('card_list')
     else:
         form = CardForm()
@@ -26,15 +30,24 @@ def card_add(request):
 
 @login_required
 def review_today(request):
-    today = date.today()
-    due_schedules = ReviewSchedule.objects.filter(card__user=request.user, next_review__lte=today)
-    return render(request, 'cards/review_today.html', {'schedules': due_schedules})
+    user = request.user
+    schedule_qs = Schedule.objects.filter(user=user, next_review__lte=date.today()).order_by('next_review')
+
+    if not schedule_qs.exists():
+        return render(request, "cards/review_done.html")
+
+    current_schedule = schedule_qs.first()
+    show_translation = request.method == "POST"  # перевод показываем только после POST
+
+    return render(request, "cards/review_today.html", {
+        "schedule": current_schedule,
+        "show_translation": show_translation,
+    })
 
 @login_required
 def review_result(request, schedule_id, quality):
-    schedule = get_object_or_404(ReviewSchedule, id=schedule_id, card__user=request.user)
-    quality = int(quality)
-    schedule.update_schedule(quality)
+    schedule = get_object_or_404(Schedule, id=schedule_id, user=request.user)
+    update_schedule(schedule, int(quality))
     return redirect('review_today')
 
 

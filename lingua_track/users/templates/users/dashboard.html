@@ -2,12 +2,42 @@
 {% block title %}Панель управления{% endblock %}
 
 {% block content %}
-<h2 class="mb-3">Добро пожаловать, {{ user.username }}!</h2>
+<div class="container mt-4">
+    <h2 class="mb-3">Добро пожаловать, {{ user.username }}!</h2>
 
-{% if not user.userprofile.telegram_id %}
-    <p>Вы ещё не привязали Telegram.</p>
-    <a class="btn btn-outline-primary" href="https://t.me/YOUR_BOT_NAME?start={{ user.id }}">Привязать Telegram</a>
-{% else %}
-    <p><strong>Telegram ID:</strong> {{ user.userprofile.telegram_id }}</p>
-{% endif %}
+    {% if not user.userprofile.telegram_id %}
+        <p>Вы ещё не привязали Telegram.</p>
+        <a class="btn btn-outline-primary" href="{{ tg_link }}">Привязать Telegram</a>
+    {% else %}
+        <p><strong>Telegram ID:</strong> {{ user.userprofile.telegram_id }}</p>
+    {% endif %}
+
+    <hr>
+
+    <h4>Прогресс обучения</h4>
+    <p>Выучено {{ learned_cards }} из {{ total_cards }} ({{ percent_learned }}%)</p>
+    <div class="progress mb-3" style="height: 25px;">
+        <div class="progress-bar" role="progressbar" style="width: {{ percent_learned }}%;" aria-valuenow="{{ percent_learned }}" aria-valuemin="0" aria-valuemax="100">
+            {{ percent_learned }}%
+        </div>
+    </div>
+
+    <p><strong>Карточек на сегодня:</strong> {{ due_cards }}</p>
+
+    <h5 class="mt-4">Качество запоминания</h5>
+    <ul>
+        {% for quality, count in quality_stats.items %}
+            <li>Оценка {{ quality }} — {{ count }} карточек</li>
+        {% endfor %}
+    </ul>
+
+    <h5 class="mt-4">Ближайшие повторы</h5>
+    <ul>
+        {% for sched in upcoming_reviews %}
+            <li>{{ sched.card.word }} — {{ sched.next_review }}</li>
+        {% empty %}
+            <li>Нет предстоящих повторений</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
