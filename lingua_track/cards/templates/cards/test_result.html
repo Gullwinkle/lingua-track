@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    {% if is_correct %}
+        <div class="alert alert-success">✅ Верно! Перевод: <strong>{{ correct_translation }}</strong></div>
+    {% else %}
+        <div class="alert alert-danger">❌ Неверно. Правильный ответ: <strong>{{ correct_translation }}</strong></div>
+    {% endif %}
+
+    <a href="{% url 'card_test' %}" class="btn btn-primary">Следующее слово</a>
+</div>
+{% endblock %}

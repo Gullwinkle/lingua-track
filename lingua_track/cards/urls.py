@@ -9,4 +9,5 @@ urlpatterns = [
     path('<int:card_id>/delete/', views.card_delete, name='card_delete'),  # Для удаления
     path('review/', views.review_today, name='review_today'),
     path('review/<int:schedule_id>/<int:quality>/', views.review_result, name='review_result'),
+    path("cards/test/", views.card_test, name="card_test"),
 ]

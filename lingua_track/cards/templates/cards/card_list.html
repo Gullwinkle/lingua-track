@@ -7,6 +7,35 @@
         <a href="{% url 'card_add' %}" class="btn btn-primary">➕ Добавить</a>
     </div>
 
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label for="sort" class="form-label">Сортировать по:</label>
+            <select name="sort" id="sort" class="form-select">
+                <option value="created_at" {% if sort_field == "created_at" %}selected{% endif %}>Дате добавления</option>
+                <option value="efactor" {% if sort_field == "efactor" %}selected{% endif %}>Уровню запоминания</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="dir" class="form-label">Направление:</label>
+            <select name="dir" id="dir" class="form-select">
+                <option value="desc" {% if sort_dir == "desc" %}selected{% endif %}>По убыванию</option>
+                <option value="asc" {% if sort_dir == "asc" %}selected{% endif %}>По возрастанию</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="level" class="form-label">Уровень:</label>
+            <select name="level" id="level" class="form-select">
+                <option value="">Все</option>
+                <option value="beginner" {% if level_filter == "beginner" %}selected{% endif %}>Начальный</option>
+                <option value="intermediate" {% if level_filter == "intermediate" %}selected{% endif %}>Средний</option>
+                <option value="advanced" {% if level_filter == "advanced" %}selected{% endif %}>Продвинутый</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-outline-primary w-100">Применить</button>
+        </div>
+    </form>
+
     {% if cards %}
         <div class="row row-cols-1 row-cols-md-2 g-4">
             {% for card in cards %}
@@ -16,6 +45,7 @@
                         <div>
                             <h5 class="card-title mb-1">{{ card.word }}</h5>
                             <p class="card-text">{{ card.translation }}</p>
+                            <small class="text-muted">{{ card.get_level_display }}</small>
                         </div>
                         <div class="ms-3 d-flex flex-column align-items-end">
                             <a href="{% url 'card_detail' card.id %}" class="btn btn-outline-primary btn-sm mb-1">🔍</a>
