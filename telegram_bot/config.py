@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv('../../.env')
+load_dotenv('../.env')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 API_URL = 'http://localhost:8000/api'
