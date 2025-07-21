@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
     'cards',
     'users.apps.UsersConfig',
     'stats',
@@ -136,3 +137,10 @@ TELEGRAM_BOT_USERNAME = 'gull_edu_bot'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# celery
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Автозагрузка задач
+CELERY_IMPORTS = ['cards.tasks', 'telegram_bot.tasks']
